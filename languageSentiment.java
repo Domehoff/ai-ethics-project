@@ -9,6 +9,11 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.*;
 
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
+
+
 //import packages
 public class languageSentiment{
 	public static void main(String[] args){
@@ -98,7 +103,8 @@ public class languageSentiment{
 		}
 
 
-	}
+ }
+
 static String cleanTweet(String in) {
   in = in.trim()
   // remove unnecessary characters and elements
@@ -108,11 +114,14 @@ static String cleanTweet(String in) {
   .replaceAll("[\\s]+", " ");
    return in;
 }
+
 static long getIDFromLine(String in){
 	return Long.parseLong(in.substring(15, in.indexOf("\",\"created_at")));
 }
+
 static boolean textIsEnglish(String in) {
-	//load all languages:
+	// retrieve all languages, then contruct a dector object
+	// to use a text factory in order to decipher language
 	List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
 	LanguageDetector languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
         	.withProfiles(languageProfiles)
@@ -126,16 +135,33 @@ static boolean textIsEnglish(String in) {
 	}
 	return false;
 }
+
 static String getTextFromID(long id){
-	//FILL IN
-	return "good nice bad,awful, excellent";
+	final Twitter twitter = new TwitterFactory().getInstance();
+	 twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
+	 AccessToken accessToken = new AccessToken(TWITTER_TOKEN, TWITTER_TOKEN_SECRET);
+	 twitter.setOAuthAccessToken(accessToken);
+	 try {
+			 Status status = twitter.showStatus(Long.parseLong(id));
+			 if(status != null) {
+				 // successfully found tweet 
+					 return status.getText();
+			 }
+	 } catch (TwitterException e) {
+			 System.err.print("Failed to search tweets: " + e.getMessage());
+	 }
+	 // if status was null
+	 return "";
 }
+
 static boolean isTagged(String in) {
 	return in.contains("country_code");
 }
+
 static String getCountryFromLine(String in){
 	return in.substring(in.indexOf("country_code\":\"")+15, in.indexOf("country_code\":\"")+17);
 }
+
 static int generateSentiment(String text){
 	//FILL IN
 	//1 if positive, 0 if negative
