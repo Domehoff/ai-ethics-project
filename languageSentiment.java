@@ -142,9 +142,9 @@ static String getTextFromID(long id){
 	 AccessToken accessToken = new AccessToken(TWITTER_TOKEN, TWITTER_TOKEN_SECRET);
 	 twitter.setOAuthAccessToken(accessToken);
 	 try {
-			 Status status = twitter.showStatus(Long.parseLong(id));
+			 Status status = twitter.showStatus(id);
 			 if(status != null) {
-				 // successfully found tweet 
+				 // successfully found tweet
 					 return status.getText();
 			 }
 	 } catch (TwitterException e) {
