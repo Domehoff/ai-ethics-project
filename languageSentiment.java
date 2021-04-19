@@ -2,7 +2,9 @@
 import java.io.*;
 import java.util.*;
 
-import org.apache.tika.language.LanguageIdentifier;
+import org.apache.tika.langdetect.OptimaizeLangDetector;
+import org.apache.tika.language.detect.LanguageDetector;
+import org.apache.tika.language.detect.LanguageResult;
 
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
@@ -22,6 +24,11 @@ import twitter4j.http.AccessToken;
 
 //import packages
 public class languageSentiment{
+	private static final String CONSUMER_KEY = "LNuTahzBiJlCXkJ2ACdas16rQ";
+	private static final String CONSUMER_KEY_SECRET = "UGZrrUtA16jY36BsemIFaLQN0TlK5Sj3gNuWfvfbypG0RUIknp";
+	private static final String TWITTER_TOKEN = "3192975130nJWZLKk6gjZEt6oWzHNnLa5JsYsdmV9ZhzFpNBV";
+	private static final String TWITTER_TOKEN_SECRET = "64So33HEWkjw9F9x5yRgcbp7is7YaAIxpe9O50Agysarx";
+
 	public static void main(String[] args){
 		HashMap<String, Long> countries = new HashMap<String, Long>();
 		HashMap<String, Integer> countriesNumber = new HashMap<String, Integer>();
@@ -124,28 +131,31 @@ static long getIDFromLine(String in){
 	return Long.parseLong(in.substring(15, in.indexOf("\",\"created_at")));
 }
 
-@SuppressWarnings("deprecation")
+
 static boolean textIsEnglish(String in) {
 	// retrieve all languages
 	// to use a text factory in order to decipher language
-	LanguageIdentifier identifier = new LanguageIdentifier("english");
-    String language = identifier.getLanguage();
-    if(language.equals("en")) { return true; }
+	LanguageDetector identifier = new OptimaizeLangDetector().loadModels();
+	identifier.reset();
+    identifier.addText(in);
+    LanguageResult language = identifier.detect();
+    if(language.getLanguage().equals("en") || language.getLanguage().equals("english")) 
+    { return true; }
 	return false;
 }
 
-@SuppressWarnings("deprecation")
 static String getTextFromID(long id){
-	final Twitter twitter = new TwitterFactory().getInstance();
-	twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
-    AccessToken accessToken = new AccessToken(TWITTER_TOKEN,
-            TWITTER_TOKEN_SECRET);
-    twitter.setOAuthAccessToken(accessToken);
+	final ConfigurationBuilder cb = new ConfigurationBuilder()
+		      .setOAuthConsumerKey(CONSUMER_KEY)
+		      .setOAuthConsumerSecret(CONSUMER_KEY_SECRET)
+		      .setOAuthAccessToken(TWITTER_TOKEN)
+		      .setOAuthAccessTokenSecret(TWITTER_TOKEN_SECRET);
+	final Twitter twitter = new TwitterFactory(cb.build()).getInstance();
 	 try {
 			 Status status = twitter.showStatus(id);
 			 if(status != null) {
 				 // successfully found tweet
-					 return status.getText();
+					 return cleanTweet(status.getText());
 			 }
 	 } catch (TwitterException e) {
 			 System.err.print("Failed to search tweets: " + e.getMessage());
