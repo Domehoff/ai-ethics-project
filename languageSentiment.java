@@ -21,7 +21,6 @@ import twitter4j.http.AccessToken;
 
 
 //import packages
-@SuppressWarnings("deprecation")
 public class languageSentiment{
 	public static void main(String[] args){
 		HashMap<String, Long> countries = new HashMap<String, Long>();
@@ -175,10 +174,9 @@ static int generateSentiment(String text){
 
 		// if the tweet is scored 0 or 1, this is a negatively
 		// marked sentiment
-		if(temp == 0 || temp == 1) {
+		if(temp == 0 || temp == 1 || temp == 2) {
 			return 0;
 		}
-
 		// else this tweet has been marked positively
 		// (since there are 5 sentiment levels 0->4, the nuetral
 		// score of 0 is counted as positive
