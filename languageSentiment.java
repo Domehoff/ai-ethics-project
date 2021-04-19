@@ -137,6 +137,10 @@ static boolean textIsEnglish(String in) {
 @SuppressWarnings("deprecation")
 static String getTextFromID(long id){
 	final Twitter twitter = new TwitterFactory().getInstance();
+	twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
+    AccessToken accessToken = new AccessToken(TWITTER_TOKEN,
+            TWITTER_TOKEN_SECRET);
+    twitter.setOAuthAccessToken(accessToken);
 	 try {
 			 Status status = twitter.showStatus(id);
 			 if(status != null) {
@@ -174,12 +178,14 @@ static int generateSentiment(String text){
 
 		// if the tweet is scored 0 or 1, this is a negatively
 		// marked sentiment
-		if(temp == 0 || temp == 1 || temp == 2) {
+		if(temp == 0 || temp == 1) {
 			return 0;
 		}
+		// disregard text
+		else if(temp == 2) {
+			return -1;
+		}
 		// else this tweet has been marked positively
-		// (since there are 5 sentiment levels 0->4, the nuetral
-		// score of 0 is counted as positive
 		else  {	return 1; }
 	}
 	return 0;
