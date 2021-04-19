@@ -11,7 +11,6 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.*;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -22,6 +21,7 @@ import twitter4j.http.AccessToken;
 
 
 //import packages
+@SuppressWarnings("deprecation")
 public class languageSentiment{
 	public static void main(String[] args){
 		HashMap<String, Long> countries = new HashMap<String, Long>();
@@ -30,7 +30,7 @@ public class languageSentiment{
 		HashMap<String, Long> countriesNegative = new HashMap<String, Long>();
 		HashMap<Integer, String> numberCountries = new HashMap<Integer, String>();
 		List<HashMap<String , dictionaryEntry>> dictionary  = new ArrayList<HashMap<String,dictionaryEntry>>();
-
+		//System.out.println("Got here");
 		Scanner reader;
 		try {
 			reader = new Scanner(new File("geo_2020-04-21.json"));
@@ -108,7 +108,6 @@ public class languageSentiment{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 
  }
 
