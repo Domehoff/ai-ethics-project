@@ -2,16 +2,23 @@
 import java.io.*;
 import java.util.*;
 
+import org.apache.tika.language.LanguageIdentifier;
+
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.*;
 
+import twitter4j.Status;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.http.AccessToken;
 
 
 //import packages
@@ -119,28 +126,19 @@ static long getIDFromLine(String in){
 	return Long.parseLong(in.substring(15, in.indexOf("\",\"created_at")));
 }
 
+@SuppressWarnings("deprecation")
 static boolean textIsEnglish(String in) {
-	// retrieve all languages, then contruct a dector object
+	// retrieve all languages
 	// to use a text factory in order to decipher language
-	List<LanguageProfile> languageProfiles = new LanguageProfileReader().readAllBuiltIn();
-	LanguageDetector languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
-        	.withProfiles(languageProfiles)
-        	.build();
-	TextObjectFactory textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
-	TextObject textObject = textObjectFactory.forText(in);
-	Optional<LdLocale> lang = languageDetector.detect(textObject);
-	if(lang.equals("en") || lang.equals("English"))
-	{
-		return true;
-	}
+	LanguageIdentifier identifier = new LanguageIdentifier("english");
+    String language = identifier.getLanguage();
+    if(language.equals("en")) { return true; }
 	return false;
 }
 
+@SuppressWarnings("deprecation")
 static String getTextFromID(long id){
 	final Twitter twitter = new TwitterFactory().getInstance();
-	 twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
-	 AccessToken accessToken = new AccessToken(TWITTER_TOKEN, TWITTER_TOKEN_SECRET);
-	 twitter.setOAuthAccessToken(accessToken);
 	 try {
 			 Status status = twitter.showStatus(id);
 			 if(status != null) {
@@ -152,6 +150,7 @@ static String getTextFromID(long id){
 	 }
 	 // if status was null
 	 return "";
+
 }
 
 static boolean isTagged(String in) {
@@ -186,6 +185,7 @@ static int generateSentiment(String text){
 		// score of 0 is counted as positive
 		else  {	return 1; }
 	}
+	return 0;
 }
 
 }
